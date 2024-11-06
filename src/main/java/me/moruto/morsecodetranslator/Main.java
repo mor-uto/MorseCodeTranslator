@@ -1,40 +1,14 @@
 package me.moruto.morsecodetranslator;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
-    private static final Map<String, String> dictionary = new HashMap<String, String>() {{
-        put("A", ".-");
-        put("B", "-...");
-        put("C", "-.-.");
-        put("D", "-..");
-        put("E", ".");
-        put("F", "..-.");
-        put("G", "--.");
-        put("H", "....");
-        put("I", "..");
-        put("J", ".---");
-        put("K", "-.-");
-        put("L", ".-..");
-        put("M", "--");
-        put("N", "-.");
-        put("O", "---");
-        put("P", ".--.");
-        put("Q", "--.-");
-        put("R", ".-.");
-        put("S", "...");
-        put("T", "-");
-        put("U", "..-");
-        put("V", "...-");
-        put("W", ".--");
-        put("X", "-..-");
-        put("Y", "-.--");
-        put("Z", "--..");
-        // Add spaces for readability in translation output
-        put(" ", " / ");
-    }};
+    private static final Map<String, String> dictionary = loadDictionary();
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -82,5 +56,21 @@ public class Main {
             result.append(" ");
         }
         return result.toString().trim();
+    }
+
+    private static Map<String, String> loadDictionary() {
+        Map<String, String> dictionary = new HashMap<>();
+
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(Main.class.getResourceAsStream("/dictionary.txt")))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                String[] parts = line.split("\\|");
+                dictionary.put(parts[0], parts[1]);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return dictionary;
     }
 }
