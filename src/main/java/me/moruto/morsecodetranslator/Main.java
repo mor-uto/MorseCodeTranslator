@@ -1,7 +1,6 @@
 package me.moruto.morsecodetranslator;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,65 +11,40 @@ public class Main {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Choose mode:");
-        System.out.println("1: English to Morse");
-        System.out.println("2: Morse to English");
-
+        System.out.println("1: English to Morse\n2: Morse to English");
         String choice = scanner.nextLine().trim();
 
-        if (!choice.equals("1") && !choice.equals("2")) {
-            throw new IllegalArgumentException("Invalid choice. Please enter 1 or 2.");
+        while (true) {
+            System.out.print("Enter text: ");
+            String input = scanner.nextLine().trim().toUpperCase();
+            System.out.println("Translated: " + (choice.equals("1") ? toMorse(input) : toEnglish(input)));
         }
-
-        System.out.println("Enter your text: ");
-        String input = scanner.nextLine().trim().toUpperCase();
-
-        if (choice.equals("1")) {
-            System.out.println("Translated: " + translateToMorse(input));
-            return;
-        }
-
-        System.out.println("Translated: " + translateToEnglish(input));
     }
 
-    private static String translateToMorse(String input) {
+    private static String toMorse(String input) {
         StringBuilder result = new StringBuilder();
-        for (char character : input.toCharArray()) {
-            String morseCode = dictionary.getOrDefault(String.valueOf(character), "?");
-            result.append(morseCode).append(" ");
-        }
+        for (char c : input.toCharArray()) result.append(dictionary.getOrDefault(String.valueOf(c), "?")).append(" ");
         return result.toString().trim();
     }
 
-    private static String translateToEnglish(String morseInput) {
+    private static String toEnglish(String input) {
         StringBuilder result = new StringBuilder();
-        String[] morseWords = morseInput.split(" / ");
-        for (String morseWord : morseWords) {
-            for (String morseChar : morseWord.split(" ")) {
-                result.append(dictionary.entrySet().stream()
-                        .filter(entry -> entry.getValue().equals(morseChar))
-                        .map(Map.Entry::getKey)
-                        .findFirst()
-                        .orElse("?"));
-            }
-            result.append(" ");
-        }
-        return result.toString().trim();
+        for (String word : input.split(" / "))
+            for (String morse : word.split(" "))
+                result.append(dictionary.entrySet().stream().filter(e -> e.getValue().equals(morse)).map(Map.Entry::getKey).findFirst().orElse("?"));
+        return result.toString();
     }
 
     private static Map<String, String> loadDictionary() {
-        Map<String, String> dictionary = new HashMap<>();
-
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(Main.class.getResourceAsStream("/dictionary.txt")))) {
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
+        Map<String, String> dict = new HashMap<>();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(Main.class.getResourceAsStream("/dictionary.txt")))) {
+            br.lines().forEach(line -> {
                 String[] parts = line.split("\\|");
-                dictionary.put(parts[0], parts[1]);
-            }
-        } catch (IOException e) {
+                dict.put(parts[0], parts[1]);
+            });
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return dictionary;
+        return dict;
     }
 }
